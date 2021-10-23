@@ -5,8 +5,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-int ft_printf(const char *format, ...);
-
 typedef struct fld{
 	int width;
 	int height;
@@ -21,6 +19,17 @@ typedef struct s_list{
 	char c_char;
 	struct s_list *next;
 } l_list;
+
+void ft_putstr(const char *str)
+{
+	int i = 0;
+	while(str[i])
+	{
+		write(1, &(str[i]), 1);
+		i++;
+	}
+}
+
 
 void free_lst(l_list *lst)
 {
@@ -103,21 +112,27 @@ int get_circles(FILE *fd, l_list **lst)
 {
 	l_list l;
 
-	if(fscanf(fd, "\n%c %lf %lf %lf %c", &(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char)) != 5)
+	if(fscanf(fd, "\n%c %lf %lf %lf %c",
+		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char)) != 5)
 		return(1);
 	l_list *start = lst_new(l);
 	if(!start)
 		return(1);
-	int res = fscanf(fd, "\n%c %lf %lf %lf %c", &(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char));
-	while(res == 5)
+	int res;
+	while((res = fscanf(fd, "\n%c %lf %lf %lf %c",
+		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char))) == 5)
 	{
 		lst_add(start, lst_new(l));
-		res = fscanf(fd, "\n%c %lf %lf %lf %c", &(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char));
 	}
 	*lst = start;
 	if(res != -1)
 		return(1);
 	return(0);
+}
+
+double sqr(double x)
+{
+	return(x * x);
 }
 
 int check_prox(l_list *lst, double y, double x)
@@ -132,7 +147,7 @@ int check_prox(l_list *lst, double y, double x)
 			type = 0;
 		else
 			type = 1;
-		dist = sqrt(((ptr->x - x) * (ptr->x - x)) + ((ptr->y - y) * (ptr->y - y)));
+		dist = sqrt(sqr(ptr->x - x) + sqr(ptr->y - y));
 		if(type == 1)
 		{
 			if(dist > ptr->radius - type && dist <= ptr->radius)
@@ -170,20 +185,20 @@ int main(int argc, char **argv)
 {
 	if(argc != 2)
 	{
-		printf("arg error\n");
+		ft_putstr("arg error\n");
 		return(1);
 	}
 	FILE *fd = fopen(argv[1], "r");
 	if(!fd)
 	{
-		printf("bad file\n");
+		ft_putstr("bad file\n");
 		return(1);
 	}
 	t_field *field = (t_field *)malloc(sizeof(t_field));
 	if(get_field(field, fd))
 	{
 		free(field);
-		printf("bad file\n");
+		ft_putstr("bad file\n");
 		return(1);
 	}
 	l_list *lst;
@@ -191,7 +206,7 @@ int main(int argc, char **argv)
 	{
 		free_lst(lst);
 		free(field);
-		printf("bad file\n");
+		ft_putstr("bad file\n");
 		return(1);
 	}
 	char **field_arr = get_arr(field);
@@ -199,7 +214,8 @@ int main(int argc, char **argv)
 	char **buff = field_arr;
 	while(*buff)
 	{
-		printf("%s\n", *buff);
+		ft_putstr(*buff);
+		ft_putstr("\n");
 		buff++;
 	}
 	free_arr(field_arr);
