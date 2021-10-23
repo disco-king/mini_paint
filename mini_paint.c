@@ -30,11 +30,11 @@ void ft_putstr(const char *str)
 	}
 }
 
-
 void free_lst(l_list *lst)
 {
+	if(!lst)
+		return ;
 	l_list *buff = lst;
-
 	lst = lst->next;
 	while(buff->next)
 	{
@@ -111,14 +111,21 @@ int get_field(t_field *field, FILE *fd)
 int get_circles(FILE *fd, l_list **lst)
 {
 	l_list l;
+	int res;
 
-	if(fscanf(fd, "\n%c %lf %lf %lf %c",
-		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char)) != 5)
-		return(1);
+	if((res = fscanf(fd, "\n%c %lf %lf %lf %c",
+		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char))) != 5)
+	{
+		if(res == -1)
+		{
+			*lst = NULL;
+			return(0);
+		}
+		return(-1);
+	}
 	l_list *start = lst_new(l);
 	if(!start)
 		return(1);
-	int res;
 	while((res = fscanf(fd, "\n%c %lf %lf %lf %c",
 		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char))) == 5)
 	{
@@ -167,6 +174,8 @@ void fill_arr(char **arr, l_list *lst)
 	int width;
 	int c;
 
+	if(lst == NULL)
+		return ;
 	while(arr[height])
 	{
 		width = 0;
