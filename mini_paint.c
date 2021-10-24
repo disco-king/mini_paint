@@ -101,8 +101,8 @@ int get_field(t_field *field, FILE *fd)
 	int res;
 
 	res = fscanf(fd, "%d %d %c", &(field->width), &(field->height), &(field->b_char));
-	if(field->width < 0 || field->width > 300 ||
-		field->height < 0 || field->height > 300 ||
+	if(field->width <= 0 || field->width > 300 ||
+		field->height <= 0 || field->height > 300 ||
 		res != 3)
 		return(1);
 	return(0);
@@ -121,7 +121,7 @@ int get_circles(FILE *fd, l_list **lst)
 			*lst = NULL;
 			return(0);
 		}
-		return(-1);
+		return(1);
 	}
 	l_list *start = lst_new(l);
 	if(!start)
@@ -154,7 +154,7 @@ int check_prox(l_list *lst, double y, double x)
 			type = 0;
 		else
 			type = 1;
-		dist = sqrt(sqr(ptr->x - x) + sqr(ptr->y - y));
+		dist = sqrtf(sqr(ptr->x - x) + sqr(ptr->y - y));
 		if(type == 1)
 		{
 			if(dist > ptr->radius - type && dist <= ptr->radius)
@@ -190,33 +190,40 @@ void fill_arr(char **arr, l_list *lst)
 	}
 }
 
+int exitf(int code)
+{
+	if(code)
+		ft_putstr("Error: Operation file corrupted\n");
+	else
+		ft_putstr("Error: argument\n");
+	return(1);
+}
+
 int main(int argc, char **argv)
 {
 	if(argc != 2)
 	{
-		ft_putstr("arg error\n");
-		return(1);
+		return(exitf(0));
 	}
 	FILE *fd = fopen(argv[1], "r");
 	if(!fd)
 	{
-		ft_putstr("bad file\n");
-		return(1);
+		return(exitf(1));
 	}
 	t_field *field = (t_field *)malloc(sizeof(t_field));
 	if(get_field(field, fd))
 	{
 		free(field);
-		ft_putstr("bad file\n");
-		return(1);
+		fclose(fd);
+		return(exitf(1));
 	}
 	l_list *lst;
 	if(get_circles(fd, &lst))
 	{
 		free_lst(lst);
 		free(field);
-		ft_putstr("bad file\n");
-		return(1);
+		fclose(fd);
+		return(exitf(1));
 	}
 	char **field_arr = get_arr(field);
 	fill_arr(field_arr, lst);
