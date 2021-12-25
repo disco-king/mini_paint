@@ -129,11 +129,18 @@ int get_circles(FILE *fd, l_list **lst)
 	while((res = fscanf(fd, "\n%c %lf %lf %lf %c",
 		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char))) == 5)
 	{
+		if(l.type != 'c' && l.type != 'C')
+		{
+			res = 0;
+			break;
+		}
 		lst_add(start, lst_new(l));
 	}
 	*lst = start;
 	if(res != -1)
+	{
 		return(1);
+	}
 	return(0);
 }
 
