@@ -13,9 +13,9 @@ typedef struct fld{
 
 typedef struct s_list{
 	char type;
-	double x;
-	double y;
-	double radius;
+	float x;
+	float y;
+	float radius;
 	char c_char;
 	struct s_list *next;
 } l_list;
@@ -113,23 +113,19 @@ int get_circles(FILE *fd, l_list **lst)
 	l_list l;
 	int res;
 
-	if((res = fscanf(fd, "\n%c %lf %lf %lf %c",
-		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char))) != 5)
-	{
-		if(res == -1)
-		{
-			*lst = NULL;
-			return(0);
-		}
+	res = fscanf(fd, "\n%c %f %f %f %c",
+		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char));
+	if(res == -1)
+		return(0);
+	else if(res != 5 || (l.type != 'c' && l.type != 'C') || l.radius <= 0)
 		return(1);
-	}
 	l_list *start = lst_new(l);
 	if(!start)
 		return(1);
-	while((res = fscanf(fd, "\n%c %lf %lf %lf %c",
+	while((res = fscanf(fd, "\n%c %f %f %f %c",
 		&(l.type), &(l.x), &(l.y), &(l.radius), &(l.c_char))) == 5)
 	{
-		if(l.type != 'c' && l.type != 'C')
+		if((l.type != 'c' && l.type != 'C') || l.radius <= 0)
 		{
 			res = 0;
 			break;
@@ -144,17 +140,17 @@ int get_circles(FILE *fd, l_list **lst)
 	return(0);
 }
 
-double sqr(double x)
+float sqr(float x)
 {
 	return(x * x);
 }
 
-int check_prox(l_list *lst, double y, double x)
+int check_prox(l_list *lst, float y, float x)
 {
 	l_list *ptr = lst;
-	double dist;
+	float dist;
 	int flag = 0;
-	double type;
+	float type;
 	while(ptr)
 	{
 		if(ptr->type == 'C')
@@ -188,7 +184,7 @@ void fill_arr(char **arr, l_list *lst)
 		width = 0;
 		while(arr[height][width])
 		{
-			c = check_prox(lst, (double)height, (double)width);
+			c = check_prox(lst, (float)height, (float)width);
 			if(c)
 				arr[height][width] = c;
 			width++;
@@ -225,6 +221,7 @@ int main(int argc, char **argv)
 		return(exitf(1));
 	}
 	l_list *lst;
+	lst = NULL;
 	if(get_circles(fd, &lst))
 	{
 		free_lst(lst);
