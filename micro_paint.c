@@ -151,11 +151,11 @@ float sqr(float x)
 
 int get_char(l_list *lst, float x, float y)
 {
-	if (((x < lst->x || (lst->x + lst->width < x))
-		|| (y < lst->y)) || (lst->y + lst->height < y))
+	if (x < lst->x || (lst->x + lst->width < x) ||
+		y < lst->y || (lst->y + lst->height < y))
 		return (0);
-	if (((x - lst->x < 1) || ((lst->x + lst->width) - x < 1)) ||
-	((y - lst->y < 1 || ((lst->y + lst->height) - y < 1))))
+	if (x - lst->x < 1 || (lst->x + lst->width - x) < 1 ||
+		y - lst->y < 1 || (lst->y + lst->height - y) < 1)
 		return (2);
 	return (1);
 }
@@ -167,10 +167,9 @@ int check_prox(l_list *lst, float y, float x)
 	while(ptr)
 	{
 		buff = get_char(ptr, x, y);
-		if((buff == 2 && lst->type == 'r') ||
-			(lst->type == 'R' && buff))
-			ret = lst->c_char;
-		buff = 0;
+		if((buff == 2 && ptr->type == 'r') ||
+			(ptr->type == 'R' && buff))
+			ret = ptr->c_char;
 		ptr = ptr->next;
 	}
 	return(ret);
@@ -192,7 +191,6 @@ void fill_arr(char **arr, l_list *lst)
 			c = check_prox(lst, (float)height, (float)width);
 			if(c)
 				arr[height][width] = c;
-			c = 0;
 			width++;
 		}
 		height++;
